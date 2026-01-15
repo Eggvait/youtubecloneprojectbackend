@@ -1,0 +1,3 @@
+[submodule "youtubecloneproject"]
+	path = youtubecloneproject
+	url = https://github.com/Eggvait/youtubecloneproject.git
