@@ -16,4 +16,42 @@ router.get("/me", verifyToken, async (req, res) => {
   }
 });
 
+// Subscribe
+router.post("/:id/subscribe", verifyToken, async (req, res) => {
+  try {
+    if (req.userId === req.params.id)
+      return res.status(400).json({ message: "Cannot subscribe to yourself" });
+
+    await User.findByIdAndUpdate(req.params.id, {
+      $inc: { subscribers: 1 },
+    });
+
+    await User.findByIdAndUpdate(req.userId, {
+      $addToSet: { subscribedUsers: req.params.id },
+    });
+
+    res.json({ message: "Subscribed" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Unsubscribe
+router.post("/:id/unsubscribe", verifyToken, async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.params.id, {
+      $inc: { subscribers: -1 },
+    });
+
+    await User.findByIdAndUpdate(req.userId, {
+      $pull: { subscribedUsers: req.params.id },
+    });
+
+    res.json({ message: "Unsubscribed" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
 module.exports = router;
