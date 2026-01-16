@@ -6,21 +6,33 @@ const User = require("../Models/User");
 router.post("/signup", signup);
 router.post("/login", login);
 
-// ✅ Protected route
+// ✅ Get current user
 router.get("/me", verifyToken, async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select("-password");
+    const user = await User.findById(req.userId)
+      .select("-password")
+      .populate("subscribedUsers", "_id channelName profileImage");
     res.json(user);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// Subscribe
+// ✅ Subscribe
 router.post("/:id/subscribe", verifyToken, async (req, res) => {
   try {
-    if (req.userId === req.params.id)
+    if (req.userId === req.params.id) {
       return res.status(400).json({ message: "Cannot subscribe to yourself" });
+    }
+
+    const alreadySubscribed = await User.findOne({
+      _id: req.userId,
+      subscribedUsers: req.params.id,
+    });
+
+    if (alreadySubscribed) {
+      return res.status(400).json({ message: "Already subscribed" });
+    }
 
     await User.findByIdAndUpdate(req.params.id, {
       $inc: { subscribers: 1 },
@@ -36,7 +48,7 @@ router.post("/:id/subscribe", verifyToken, async (req, res) => {
   }
 });
 
-// Unsubscribe
+// ✅ Unsubscribe
 router.post("/:id/unsubscribe", verifyToken, async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.params.id, {
@@ -52,6 +64,5 @@ router.post("/:id/unsubscribe", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 module.exports = router;

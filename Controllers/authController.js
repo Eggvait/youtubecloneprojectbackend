@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 exports.signup = async (req, res) => {
   try {
-    const { channelName, username, password, about } = req.body;
+    const { channelName, username, password, about, profileImage } = req.body;
 
     if (!channelName || !username || !password) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -22,7 +22,7 @@ exports.signup = async (req, res) => {
       username,
       password: hashedPassword,
       about,
-      profileImage: req.file?.path || "",
+      profileImage: profileImage || "", // ✅ FIXED
     });
 
     await newUser.save();
@@ -32,6 +32,7 @@ exports.signup = async (req, res) => {
       user: {
         _id: newUser._id,
         username: newUser.username,
+        channelName: newUser.channelName,
       },
     });
   } catch (err) {
@@ -39,8 +40,6 @@ exports.signup = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
-
 
 exports.login = async (req, res) => {
   try {
@@ -72,6 +71,8 @@ exports.login = async (req, res) => {
         _id: user._id,
         username: user.username,
         channelName: user.channelName,
+        profileImage: user.profileImage,
+        subscribers: user.subscribers,
       },
     });
   } catch (err) {
@@ -79,4 +80,3 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
