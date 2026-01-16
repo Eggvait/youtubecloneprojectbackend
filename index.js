@@ -1,15 +1,19 @@
-var express = require("express");
-var app = express();
-var port = 4000
+require("dotenv").config();
+const express = require("express");
+const app = express();
+const cors = require("cors");
 
-require('./Connection/conn');
 
-app.get('/',(req,res)=>{
-    res.send({
-        message: "Hii we have started our backend project"
-    })
-})
+require("./Connection/conn");
 
-app.listen(port,()=> {
-    console.log("Our backend is running on port 4000")
+// ✅ ADD THESE TWO LINES
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// routes
+app.use("/auth", require("./Routes/user"));
+
+app.listen(4000, () => {
+  console.log("Our backend is running on port 4000");
 });
