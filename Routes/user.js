@@ -18,20 +18,24 @@ router.get("/me", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Subscribe
+// Get channel by ID (Profile page)
+router.get("/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Subscribe
 router.post("/:id/subscribe", verifyToken, async (req, res) => {
   try {
-    if (req.userId === req.params.id) {
+    if (req.userId.toString() === req.params.id) {
       return res.status(400).json({ message: "Cannot subscribe to yourself" });
-    }
-
-    const alreadySubscribed = await User.findOne({
-      _id: req.userId,
-      subscribedUsers: req.params.id,
-    });
-
-    if (alreadySubscribed) {
-      return res.status(400).json({ message: "Already subscribed" });
     }
 
     await User.findByIdAndUpdate(req.params.id, {
@@ -48,7 +52,7 @@ router.post("/:id/subscribe", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Unsubscribe
+// Unsubscribe
 router.post("/:id/unsubscribe", verifyToken, async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.params.id, {

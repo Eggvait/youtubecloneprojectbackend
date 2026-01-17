@@ -55,3 +55,10 @@ exports.getUserVideos = async (req, res) => {
   }
 };
 
+exports.incrementView = async (req, res) => {
+  await Video.findByIdAndUpdate(req.params.id, {
+    $inc: { views: 1 },
+  });
+  res.json({ message: "View added" });
+};
+

@@ -72,7 +72,7 @@ exports.login = async (req, res) => {
         username: user.username,
         channelName: user.channelName,
         profileImage: user.profileImage,
-        subscribers: user.subscribers,
+        subscribedUsers: user.subscribedUsers || [],
       },
     });
   } catch (err) {
