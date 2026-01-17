@@ -9,11 +9,23 @@ exports.uploadVideo = async (req, res) => {
 };
 
 exports.getAllVideos = async (req, res) => {
-  const videos = await Video.find()
-    .populate("userId", "channelName profileImage")
-    .sort({ createdAt: -1 });
-  res.json(videos);
+  try {
+    const search = req.query.search;
+
+    const query = search
+      ? { title: { $regex: search, $options: "i" } }
+      : {};
+
+    const videos = await Video.find(query)
+      .populate("userId", "channelName profileImage")
+      .sort({ createdAt: -1 });
+
+    res.json(videos);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
 };
+
 
 exports.getVideo = async (req, res) => {
   const video = await Video.findById(req.params.id).populate(
